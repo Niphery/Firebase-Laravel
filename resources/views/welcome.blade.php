@@ -10,7 +10,8 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
 
-        <!-- Styles -->
+        <!-- Styles
+
         <style>
             html, body {
                 background-color: #fff;
@@ -63,29 +64,87 @@
                 margin-bottom: 30px;
             }
         </style>
+      -->  
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    <a href="{{ url('/login') }}">Login</a>
-                    <a href="{{ url('/register') }}">Register</a>
-                </div>
-            @endif
+      <h1>Create task</h1>
+      <input type="text" v-model="task" placeholder="Task" />
+      <a @click="createTodo()">Save</a>
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
+      <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Done</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template v-for="todo in todos">
+                <tr>
+                    <td>
+                        @{{todo.task}}
+                    </td>
+                    <td>
+                        <input type="checkbox" v-model="todo.is_done" />
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+      </table>
 
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
-            </div>
-        </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.25/vue.min.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+     <!-- <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script> -->
+
+     <script>
+         // Initialize Firebase
+         var config = {
+             apiKey: "{{ config('services.firebase.api_key') }}",
+             authDomain: "{{ config('services.firebase.auth_domain') }}",
+             databaseURL: "{{ config('services.firebase.database_url') }}",
+             storageBucket: "{{ config('services.firebase.storage_bucket') }}",
+         };
+         firebase.initializeApp(config);
+
+         new Vue({
+             el: 'body',
+
+             data: {
+                 task: '',
+                 todos: []
+             },
+
+             ready: function() {
+                 var self = this;
+
+                 // Initialize firebase realtime database.
+                 firebase.database().ref('todos/').on('value', function(snapshot) {
+                     // Everytime the Firebase data changes, update the todos array.
+                     self.$set('todos', snapshot.val());
+                 });
+             },
+
+             methods: {
+
+                 /**
+                  * Create a new todo and synchronize it with Firebase
+                  */
+                 createTodo: function() {
+                     var self = this;
+
+                     // For the sake of simplicity, I'm using jQuery here
+                     $.post('/todo', {
+                         _token: '{!! csrf_token() !!}',
+                         task: self.task,
+                         is_done: false
+                     });
+
+                     this.task = '';
+                 }
+             }
+         });
+     </script>
+
     </body>
 </html>

@@ -40,7 +40,7 @@ return [
     'auth_domain' => 'test-a1bac.firebaseapp.com',
     'database_url' => 'https://test-a1bac.firebaseio.com',
     'secret' => 'c6ZEMHWsrJJ8Bt13Q74HoY6LPp5vFae67A0WZ7G4',
-    'storage_bucket' => '',
+    'storage_bucket' => 'test-a1bac.appspot.com',
     ],
 
 ];
